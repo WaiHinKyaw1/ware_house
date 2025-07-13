@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Item;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class ItemController extends Controller
 {
@@ -13,7 +14,6 @@ class ItemController extends Controller
     public function index()
     {
         $items = Item::all();
-
         return response()->json($items);
     }
 
@@ -23,7 +23,7 @@ class ItemController extends Controller
     public function store(Request $request)
     {
         $cleanData = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => ['required','string',Rule::unique('items','name')],
             'unit' => 'required|string|max:255',
             'description' => 'required|string|max:255',
             'stock_quantity' => 'required|integer',
@@ -64,7 +64,7 @@ class ItemController extends Controller
             ], 404);
         }
         $cleanData = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => ['required','string',Rule::unique('items','name')],
             'unit' => 'required|string|max:255',
             'description' => 'required|string|max:255',
             'stock_quantity' => 'required|integer',

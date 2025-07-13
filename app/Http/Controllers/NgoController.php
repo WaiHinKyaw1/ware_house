@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Ngo;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class NgoController extends Controller
 {
@@ -12,7 +13,8 @@ class NgoController extends Controller
      */
     public function index()
     {
-        //
+        $ngos = Ngo::all();
+        return response()->json($ngos);
     }
 
     /**
@@ -24,7 +26,7 @@ class NgoController extends Controller
             "name" => "required|string",
             "contact_person" => "required|string",
             "phone" => "required|string",
-            "email" => "required|email",
+            "email" => ["required","email",Rule::unique('ngos','email')],
             "address" => "required|string",
         ]);
 
@@ -65,7 +67,7 @@ class NgoController extends Controller
             "name" => ["required","string"],
             "contact_person" => ["required","string"],
             "phone" => ["required","string"],
-            "email" => ["required","email"],
+            "email" => ["required","email",Rule::unique('ngos','email')],
             "address" => ["required","string"],
         ]);
         $ngo->update($cleanData);

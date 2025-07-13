@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('license_no');
             $table->string('phone');
-            $table->enum('status', ['active', 'onLeave']);
+            $table->string('status');
             $table->timestamps();
         });
     }

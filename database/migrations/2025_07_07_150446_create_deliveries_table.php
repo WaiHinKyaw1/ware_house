@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('supply_request_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('ware_house_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->date('delivery_date');
-            $table->enum('status',['pending,approved,delivered,cancelled']);
+            $table->string('status');
             $table->decimal('delivery_cost');
             $table->timestamps();
         });

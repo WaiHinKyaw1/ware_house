@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\RouteInfo;
 use App\Models\SupplyRequest;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class SupplyRequestController extends Controller
 {
@@ -13,7 +14,7 @@ class SupplyRequestController extends Controller
      */
     public function index()
     {
-        $supply_requests = SupplyRequest::with('ngo','supplyRequestItems','routeInfos')->get();
+        $supply_requests = SupplyRequest::with('ngo')->get();
         return response()->json($supply_requests);
     }
 
@@ -23,10 +24,10 @@ class SupplyRequestController extends Controller
     public function store(Request $request)
     {
         $cleanData = $request->validate([
-            'ngo_id' => 'required|exists:ngos,id',
+            'ngo_id' => ['required',Rule::exists('ngos','id')],
             'request_date' => 'required|date',
             'items' => 'required|array|min:1',
-            'items.*.item_id' => ['required|exists:items,id'],
+            'items.*.item_id' => ['required', Rule::exists('items', 'id')],
             'items.*.quantity' => 'required|integer|min:1',
 
             'start' => 'required|string',

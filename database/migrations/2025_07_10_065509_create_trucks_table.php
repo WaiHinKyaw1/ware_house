@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('plate_no');
             $table->string('model');
             $table->integer('capacity');
-            $table->enum('status', ['available', 'inUse']);
+            $table->string('status');
             $table->foreignId('driver_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->timestamps();
         });

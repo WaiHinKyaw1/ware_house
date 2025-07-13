@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('ngo_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->date('request_date');
-            $table->enum('status',['pending,approved,delivered,cancelled']);
+            $table->string('status');
             $table->timestamps();
         });
     }

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Ngo extends Model
 {
+    protected $table = 'ngos';
     protected $fillable = [
         "name",
         "contact_person",

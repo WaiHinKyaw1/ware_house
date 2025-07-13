@@ -16,7 +16,8 @@ class DeliveryController extends Controller
      */
     public function index()
     {
-        //
+        $deliveries = Delivery::with('supplyRequest','truck','delivery')->get();
+        return response()->json($deliveries);
     }
 
     /**
@@ -56,11 +57,11 @@ class DeliveryController extends Controller
             $stock->decrement('quantity', $item['approved_quantity']);
         }
         Truck::where('id', $cleanData['truck_id'])->update([
-            'status' => 'assigned',
+            'status' => 'inUse',
             'driver_id' => $cleanData['driver_id'],
         ]);
         Driver::where('id', $cleanData['driver_id'])->update([
-            'status' => 'assigned',
+            'status' => 'onLeave',
         ]);
           // (4) Mark request as approved
           $supply_request->update(['status' => 'approved']);
@@ -75,7 +76,13 @@ class DeliveryController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $delivery = Delivery::find($id);
+        if(!$delivery){
+            return response()->json([
+                "message" => "Delivery id not found"
+            ]);
+        }
+        return response()->json($delivery);
     }
 
     /**
@@ -83,7 +90,7 @@ class DeliveryController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        
     }
 
     /**
@@ -91,6 +98,15 @@ class DeliveryController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $delivery = Delivery::find($id);
+        if(!$delivery){
+            return response()->json([
+                "message" => "Delivery id not found"
+            ]);
+        }
+        $delivery->delete();
+        return response()->json([
+            "message" => "Delivery successfully deleted",
+        ]);
     }
 }
