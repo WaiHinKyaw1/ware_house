@@ -18,6 +18,7 @@ return new class extends Migration
             $table->date('delivery_date');
             $table->string('status');
             $table->decimal('delivery_cost');
+            $table->foreignId('truck_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->timestamps();
         });
     }

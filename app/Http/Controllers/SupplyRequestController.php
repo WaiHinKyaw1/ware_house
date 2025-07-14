@@ -14,7 +14,7 @@ class SupplyRequestController extends Controller
      */
     public function index()
     {
-        $supply_requests = SupplyRequest::with('ngo')->get();
+        $supply_requests = SupplyRequest::with('ngo','supplyRequestItems','routeInfos')->get();
         return response()->json($supply_requests);
     }
 
@@ -25,7 +25,6 @@ class SupplyRequestController extends Controller
     {
         $cleanData = $request->validate([
             'ngo_id' => ['required',Rule::exists('ngos','id')],
-            'request_date' => 'required|date',
             'items' => 'required|array|min:1',
             'items.*.item_id' => ['required', Rule::exists('items', 'id')],
             'items.*.quantity' => 'required|integer|min:1',
@@ -33,10 +32,12 @@ class SupplyRequestController extends Controller
             'start' => 'required|string',
             'end' => 'required|string',
             'distance_km' => 'required|numeric',
+            'distance_miles' => 'required',
             'duration_minutes' => 'required|integer',
             'charge' => 'required|numeric',
             'polyline' => 'nullable|string',
         ]);
+        $cleanData['request_date'] =date('Y-m-d');
         $supply_request = SupplyRequest::create([
             'ngo_id' => $cleanData['ngo_id'],
             'request_date' => $cleanData['request_date'],
@@ -52,6 +53,7 @@ class SupplyRequestController extends Controller
             'start' => $cleanData['start'],
             'end' => $cleanData['end'],
             'distance_km' => $cleanData['distance_km'],
+            'distance_miles' => $cleanData['distance_miles'],
             'duration_minutes' => $cleanData['duration_minutes'],
             'charge' => $cleanData['charge'],
             'polyline' => $cleanData['polyline'] ?? null,
@@ -68,7 +70,13 @@ class SupplyRequestController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $supply_request = SupplyRequest::find($id);
+        if(!$supply_request){
+            return response()->json([
+                "message" => " Supply Request id not Found"
+            ]);
+        }
+        return response()->json($supply_request);
     }
 
     /**
@@ -84,6 +92,6 @@ class SupplyRequestController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        
     }
 }

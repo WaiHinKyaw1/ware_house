@@ -20,7 +20,6 @@ return new class extends Migration
             $table->time('duration_minutes');
             $table->integer('charge');
             $table->string('polyline')->nullable();
-            $table->foreignId('truck_id')->nullable()->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('supply_request_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->timestamps();
         });

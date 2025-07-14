@@ -42,6 +42,7 @@ class DeliveryController extends Controller
             'warehouse_id' => $supply_request->warehouse_id,
             'delivery_date' => $cleanData['delivery_date'],
             'delivery_cost' => $cleanData['delivery_cost'],
+            'truck_id' => $cleanData['truck_id'],
             'status' => 'approved',
         ]);
           // (2) Reduce stock from warehouse_items

@@ -13,7 +13,6 @@ class RouteInfo extends Model
         "distance_miles",
         "duration_minutes",
         "charge",
-        "truck_id",
         "supply_request_id"
     ];
 

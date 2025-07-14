@@ -11,7 +11,8 @@ class Delivery extends Model
         'ware_house_id',
         'delivery_date',
         'status',
-        'delivery_cost'
+        'delivery_cost',
+        'truck_id'
     ];
 
     public function supplyRequest()

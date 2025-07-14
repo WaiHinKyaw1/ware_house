@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\WareHouseItem;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class WareHouseItemController extends Controller
 {
@@ -27,33 +28,40 @@ class WareHouseItemController extends Controller
      */
     public function store(Request $request)
     {
-        $cleanData = $request->validate([
-            'ware_house_id' => ['required', 'integer', 'exists:ware_houses,id'],
-            'ngo_id' => ['required', 'integer', 'exists:ngos,id'],
-            'items' => ['required', 'array', 'min:1'],
-            'items.*.item_id' => ['required', 'integer', 'exists:items,id'],
-            'items.*.quantity' => ['required', 'integer', 'min:1'],
-        ]);
-        foreach ($cleanData['items'] as $item) {
-            $existing = WarehouseItem::where('ware_house_id', $item['ware_house_id'])
-                ->where('item_id', $item['item_id'])
-                ->where('ngo_id', $cleanData['ngo_id'])
-                ->first();
 
-            if ($existing) {
-                $existing->increment('quantity', $item['quantity']);
-            } else {
-                WarehouseItem::create([
-                    'ware_house_id' => $item['ware_house_id'],
-                    'item_id' => $item['item_id'],
-                    'ngo_id' => $cleanData['ngo_id'],
-                    'quantity' => $item['quantity'],
-                ]);
-            }
-        }
-        return response()->json([
-            'message' => "Ware House Item created successfully"
+    $cleanData = $request->validate([
+    'ware_house_id' => ['required', 'integer', 'exists:ware_houses,id'],
+    'ngo_id' => ['required', 'integer', 'exists:ngos,id'],
+    'items' => ['required', 'array', 'min:1'],
+    'items.*.item_id' => ['required', 'integer', 'exists:items,id'],
+    'items.*.quantity' => ['required', 'integer', 'min:1'],
+]);
+
+$wareHouseId = $cleanData['ware_house_id'];
+$ngoId = $cleanData['ngo_id'];
+
+foreach ($cleanData['items'] as $item) {
+    $existing = WarehouseItem::where('ware_house_id', $wareHouseId)
+        ->where('item_id', $item['item_id'])
+        ->where('ngo_id', $ngoId)
+        ->first();
+
+    if ($existing) {
+        $existing->increment('quantity', $item['quantity']);
+    } else {
+        WarehouseItem::create([
+            'ware_house_id' => $wareHouseId,
+            'item_id' => $item['item_id'],
+            'ngo_id' => $ngoId,
+            'quantity' => $item['quantity'],
         ]);
+    }
+}
+
+return response()->json([
+    "message" => "Warehouse items created successfully."
+]);
+
     }
 
     /**
@@ -65,7 +73,7 @@ class WareHouseItemController extends Controller
         $ware_house_items = WarehouseItem::whereHas('warehouse', function ($q) use ($ngoId) {
             $q->where('ngo_id', $ngoId);
         })
-            ->with('item')
+            ->with('item','wareHouse')
             ->get();
         return response()->json($ware_house_items);
     }
@@ -75,7 +83,7 @@ class WareHouseItemController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $cleanData = $request->validate([
+       $cleanData = $request->validate([
         'ware_house_id' => ['required', 'integer', 'exists:ware_houses,id'],
         'ngo_id' => ['required', 'integer', 'exists:ngos,id'],
         'items' => ['required', 'array', 'min:1'],
@@ -83,29 +91,34 @@ class WareHouseItemController extends Controller
         'items.*.quantity' => ['required', 'integer', 'min:1'],
     ]);
 
+    $wareHouseId = $cleanData['ware_house_id'];
+    $ngoId = $cleanData['ngo_id'];
+
     foreach ($cleanData['items'] as $item) {
-        $existing = WarehouseItem::where('ware_house_id', $cleanData['ware_house_id'])
+        $existing = WarehouseItem::where('ware_house_id', $wareHouseId)
             ->where('item_id', $item['item_id'])
-            ->where('ngo_id', $cleanData['ngo_id'])
+            ->where('ngo_id', $ngoId)
             ->first();
 
         if ($existing) {
+            // quantity overwrite
             $existing->update([
-                'quantity' => $item['quantity'],
+                'quantity' => $item['quantity']
             ]);
         } else {
             WarehouseItem::create([
-                'ware_house_id' => $cleanData['ware_house_id'],
+                'ware_house_id' => $wareHouseId,
                 'item_id' => $item['item_id'],
-                'ngo_id' => $cleanData['ngo_id'],
+                'ngo_id' => $ngoId,
                 'quantity' => $item['quantity'],
             ]);
         }
     }
 
     return response()->json([
-        'message' => "WarehouseItem(s) updated successfully"
+        "message" => "Warehouse items updated successfully."
     ]);
+
     }
 
     /**
