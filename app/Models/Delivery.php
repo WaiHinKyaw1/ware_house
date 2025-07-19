@@ -15,6 +15,11 @@ class Delivery extends Model
         'truck_id'
     ];
 
+    public function items()
+    {
+        return $this->hasMany(DeliveryItem::class);
+    }
+
     public function supplyRequest()
     {
         return $this->belongsTo(SupplyRequest::class);
@@ -23,5 +28,9 @@ class Delivery extends Model
     public function wareHouse()
     {
         return $this->belongsTo(WareHouse::class);
+    }
+    public function truck()
+    {
+        return $this->belongsTo(Truck::class);
     }
 }

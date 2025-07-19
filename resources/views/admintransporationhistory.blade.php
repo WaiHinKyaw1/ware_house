@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Welcome</title>
+    <title>Transportation History</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     {{-- Bootstrap CSS --}}
@@ -49,7 +49,16 @@
             background: white;
             border-radius: 15px;
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-            padding: 40px;
+            padding: 30px;
+        }
+
+        .table thead th {
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .table tbody td {
+            text-align: center;
         }
     </style>
 </head>
@@ -91,10 +100,38 @@
 
     {{-- Main content --}}
     <div class="container">
-        <div class="main-card text-center">
-            <h1 class="text-primary mb-3">Welcome to the Dashboard</h1>
-            <p class="lead">This is a modern, clean interface using Bootstrap and a blue theme. Customize your layout here.</p>
-            <a href="#" class="btn btn-primary mt-3">Get Started</a>
+        <div class="main-card">
+            <h3 class="text-primary mb-4 text-center">Transportation History</h3>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>No</th>
+                            <th>Ngo Name</th>
+                            <th>Items</th>
+                            <th>Date</th>
+                            <th>From Destination</th>
+                            <th>To Destination</th>
+                            <th>Truck</th>
+                            <th>Charges</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>...</td>
+                            <td>...</td>
+                            <td>....</td>
+                            <td>........</td>
+                            <td>..........</td>
+                            <td>...</td>
+                            <td>....</td>
+                        </tr>
+                        {{-- Add more rows or loop over data --}}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 

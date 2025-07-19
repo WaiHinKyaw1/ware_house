@@ -8,6 +8,7 @@ class SupplyRequest extends Model
 {
     protected $fillable = [
         'ngo_id',
+        'ware_house_id',
         'request_date',
         'status',
     ];
@@ -15,6 +16,9 @@ class SupplyRequest extends Model
     {
         return $this->belongsTo(Ngo::class);
     }
+    public function warehouse() {
+    return $this->belongsTo(WareHouse::class);
+}
     public function deliveries()
     {
         return $this->hasMany(Delivery::class);

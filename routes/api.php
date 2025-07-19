@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DeliveryController;
+use App\Http\Controllers\DriverController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\NgoController;
 use App\Http\Controllers\RouteInfoController;
@@ -29,3 +30,4 @@ Route::apiResource('warehouses', WareHouseController::class);
 Route::apiResource('trucks', TruckController::class);
 Route::apiResource('deliveries', DeliveryController::class);
 Route::apiResource('supply-requests', SupplyRequestController::class);
+Route::apiResource('drivers',DriverController::class);

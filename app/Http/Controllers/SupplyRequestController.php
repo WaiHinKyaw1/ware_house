@@ -25,6 +25,7 @@ class SupplyRequestController extends Controller
     {
         $cleanData = $request->validate([
             'ngo_id' => ['required',Rule::exists('ngos','id')],
+            'ware_house_id' => ['required', Rule::exists('ware_houses','id')],
             'items' => 'required|array|min:1',
             'items.*.item_id' => ['required', Rule::exists('items', 'id')],
             'items.*.quantity' => 'required|integer|min:1',
@@ -40,6 +41,7 @@ class SupplyRequestController extends Controller
         $cleanData['request_date'] =date('Y-m-d');
         $supply_request = SupplyRequest::create([
             'ngo_id' => $cleanData['ngo_id'],
+            'ware_house_id' => $cleanData['ware_house_id'],
             'request_date' => $cleanData['request_date'],
             'status' => 'pending',
         ]);
@@ -92,6 +94,14 @@ class SupplyRequestController extends Controller
      */
     public function destroy(string $id)
     {
-        
+        $supply_request = SupplyRequest::find($id);
+        if(!$supply_request){
+            return response()->json([
+                "message" => "SupplyRequest id not found"
+            ]);
+        }
+        return response()->json([
+            'message' => "Supply Request successfully deleted"
+        ]);
     }
 }
