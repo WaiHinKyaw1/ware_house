@@ -17,7 +17,7 @@ class DeliveryController extends Controller
      */
     public function index()
     {
-        $deliveries = Delivery::with('supplyRequest', 'truck', 'wareHouse')->get();
+        $deliveries = Delivery::with('supplyRequest.ngo', 'truck.driver', 'wareHouse')->get();
         return response()->json($deliveries);
     }
 
@@ -40,7 +40,7 @@ class DeliveryController extends Controller
             'delivery_date' => $cleanData['delivery_date'],
             'delivery_cost' => $cleanData['delivery_cost'],
             'truck_id' => $cleanData['truck_id'],
-            'status' => 'approved',
+            'status' => 'in Transit',
         ]);
         // (2) Reduce stock from warehouse_items
         foreach ($supply_request->supplyRequestItems as $requestItem) {
@@ -98,11 +98,24 @@ class DeliveryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id) {}
+    public function update(Request $request, string $id) {
+        $delivery = Delivery::find($id);
+        if(!$delivery){
+             return response()->json([
+                "message" => "Delivery id not found"
+            ]);
+        }
+      $cleanData= $request->validate([
+        'status' => "required"
+      ]);
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    $delivery->update($cleanData);
+    return response()->json([
+        "message" => "Delivery updated successfully"
+    ]);
+    }
+
+    
     public function destroy(string $id)
     {
         $delivery = Delivery::find($id);

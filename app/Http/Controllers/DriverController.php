@@ -25,8 +25,8 @@ class DriverController extends Controller
             "name" => ['required', 'string'],
             "phone" => ['required', 'string'],
             "license_no" => ['required', 'string'],
-            "status" => ['required']
         ]);
+        $cleanData['status'] = "active";
         $driver = Driver::create($cleanData);
         return response()->json([
             "message" => "Driver created successfully",

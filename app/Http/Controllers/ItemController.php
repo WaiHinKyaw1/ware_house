@@ -26,11 +26,9 @@ class ItemController extends Controller
             'name' => ['required','string',Rule::unique('items','name')],
             'unit' => 'required|string|max:255',
             'description' => 'required|string|max:255',
-            'stock_quantity' => 'required|integer',
         ]);
 
         $item = Item::create($cleanData);
-
         return response()->json([
             "message" => "Item created successfully",
             "id" => $item->id
@@ -67,7 +65,6 @@ class ItemController extends Controller
             'name' => ['required','string',Rule::unique('items','name')],
             'unit' => 'required|string|max:255',
             'description' => 'required|string|max:255',
-            'stock_quantity' => 'required|integer',
         ]);
         $item->update($cleanData);
 

@@ -20,8 +20,11 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::post('login', [AuthController::class, 'login']);
-Route::post('change-passwords', [AuthController::class, 'changePassword']);
-Route::post('logOut', [AuthController::class, 'logOut']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('change-passwords', [AuthController::class, 'changePassword']);
+});
+Route::get('/warehouses/{id}/capacity', [WareHouseController::class, 'capacityStatus']);
 Route::apiResource('users', UserController::class);
 Route::apiResource('items', ItemController::class);
 Route::apiResource('ngos', NgoController::class);

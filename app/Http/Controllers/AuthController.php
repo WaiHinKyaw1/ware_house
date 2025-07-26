@@ -24,9 +24,12 @@ class AuthController extends Controller
         if (!$user || !Hash::check($validated["password"], $user->password)) {
             return response()->json(["message" => "Password is incorrect."], 422);
         }
+        $token = $user->createToken($validated['email'])->plainTextToken;
 
         return response()->json([
             'message' => 'Login successful',
+            'user' => $user,
+            'token' => $token
         ]);
     }
     public function changePassword(Request $request)
@@ -49,9 +52,9 @@ class AuthController extends Controller
         return response()->json(['id' => $user->id, 'message' => 'Password successfully updated.']);
     }
 
-    public function logOut()
+    public function logout(Request $request)
     {
-        Auth::logout();
+        $request->user()->tokens()->delete();
         return response()->json([
             "message" => "LogOut is successfully",
         ]);

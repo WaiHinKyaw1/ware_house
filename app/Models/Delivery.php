@@ -22,7 +22,7 @@ class Delivery extends Model
 
     public function supplyRequest()
     {
-        return $this->belongsTo(SupplyRequest::class);
+        return $this->belongsTo(SupplyRequest::class)->with('supplyRequestItems','routeInfos');
     }
 
     public function wareHouse()

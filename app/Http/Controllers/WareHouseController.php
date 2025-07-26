@@ -4,12 +4,47 @@ namespace App\Http\Controllers;
 
 use App\Models\WareHouse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class WareHouseController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+  
+    protected $conversionFactor = [
+        'liter' => 0.85,
+        'kg' => 1,
+        'piece' => 0.5,
+    ];
+  public function capacityStatus($id)
+    {
+        $warehouse = WareHouse::find($id);
+        if (!$warehouse) {
+            return response()->json(['message' => 'Warehouse not found'], 404);
+        }
+
+        // warehouse_items join with items to get quantity and unit
+        $warehouseItems = DB::table('ware_house_items')
+            ->join('items', 'ware_house_items.item_id', '=', 'items.id')
+            ->where('ware_house_items.ware_house_id', $id)
+            ->select('ware_house_items.quantity', 'items.unit')
+            ->get();
+
+        $usedKg = 0;
+        foreach ($warehouseItems as $wi) {
+            $factor = $this->conversionFactor[$wi->unit] ?? 1;
+            $usedKg += $wi->quantity * $factor;
+        }
+
+        $remaining = $warehouse->capacity - $usedKg;
+
+        return response()->json([
+            'warehouse_id' => $warehouse->id,
+            'warehouse_name' => $warehouse->name,
+            'total_capacity_kg' => $warehouse->capacity,
+            'used_capacity_kg' => round($usedKg, 2),
+            'remaining_capacity_kg' => round($remaining, 2),
+        ]);
+    }
+
     public function index()
     {
         $ware_houses = WareHouse::all();

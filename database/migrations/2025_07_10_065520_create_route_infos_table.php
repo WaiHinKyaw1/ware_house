@@ -19,7 +19,6 @@ return new class extends Migration
             $table->decimal('distance_miles');
             $table->time('duration_minutes');
             $table->integer('charge');
-            $table->string('polyline')->nullable();
             $table->foreignId('supply_request_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->timestamps();
         });

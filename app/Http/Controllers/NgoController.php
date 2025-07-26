@@ -67,7 +67,7 @@ class NgoController extends Controller
             "name" => ["required","string"],
             "contact_person" => ["required","string"],
             "phone" => ["required","string"],
-            "email" => ["required","email",Rule::unique('ngos','email')],
+            "email" => ["required","email",Rule::unique('ngos','email')->ignore($id)],
             "address" => ["required","string"],
         ]);
         $ngo->update($cleanData);

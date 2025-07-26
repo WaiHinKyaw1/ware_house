@@ -14,7 +14,7 @@ class SupplyRequestController extends Controller
      */
     public function index()
     {
-        $supply_requests = SupplyRequest::with('ngo','supplyRequestItems','routeInfos')->get();
+        $supply_requests = SupplyRequest::with('ngo','supplyRequestItems','routeInfos','warehouse')->get();
         return response()->json($supply_requests);
     }
 
@@ -25,8 +25,9 @@ class SupplyRequestController extends Controller
     {
         $cleanData = $request->validate([
             'ngo_id' => ['required',Rule::exists('ngos','id')],
-            'ware_house_id' => ['required', Rule::exists('ware_houses','id')],
+            
             'items' => 'required|array|min:1',
+            'items.*.ware_house_id' => ['required', Rule::exists('ware_houses','id')],
             'items.*.item_id' => ['required', Rule::exists('items', 'id')],
             'items.*.quantity' => 'required|integer|min:1',
 
@@ -36,17 +37,16 @@ class SupplyRequestController extends Controller
             'distance_miles' => 'required',
             'duration_minutes' => 'required|integer',
             'charge' => 'required|numeric',
-            'polyline' => 'nullable|string',
         ]);
         $cleanData['request_date'] =date('Y-m-d');
         $supply_request = SupplyRequest::create([
             'ngo_id' => $cleanData['ngo_id'],
-            'ware_house_id' => $cleanData['ware_house_id'],
             'request_date' => $cleanData['request_date'],
             'status' => 'pending',
         ]);
         foreach($cleanData['items'] as $item){
             $supply_request->supplyRequestItems()->create([
+                'ware_house_id' => $item['ware_house_id'],
                 'item_id' => $item['item_id'],
                 'quantity' => $item['quantity'],
             ]);
@@ -58,7 +58,6 @@ class SupplyRequestController extends Controller
             'distance_miles' => $cleanData['distance_miles'],
             'duration_minutes' => $cleanData['duration_minutes'],
             'charge' => $cleanData['charge'],
-            'polyline' => $cleanData['polyline'] ?? null,
             'supply_request_id' => $supply_request->id,
         ]);
         return response()->json([   

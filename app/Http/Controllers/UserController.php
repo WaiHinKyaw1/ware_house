@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -25,7 +26,7 @@ class UserController extends Controller
         $cleanData = $request->validate([
             'name' => 'required',
             'email' => 'required|email',
-            'password' => ['required','min:6'],
+            'password' => ['required', 'min:6'],
             'role' => 'required',
             'ngo_id' => 'nullable'
         ]);
@@ -43,7 +44,7 @@ class UserController extends Controller
     public function show(string $id)
     {
         $user = User::with('ngo')->find($id);
-        if(!$user){
+        if (!$user) {
             return response()->json([
                 "message" => "User not found"
             ], 404);
@@ -57,19 +58,29 @@ class UserController extends Controller
     public function update(Request $request, string $id)
     {
         $user = User::with('ngo')->find($id);
-        if(!$user){
+        if (!$user) {
             return response()->json([
                 "message" => "User not found"
             ], 404);
         }
 
         $cleanData = $request->validate([
-            'name' => 'required',
-            'email' => 'required|email',
-            'password' => 'required',
-            'role' => 'required',
-            'ngo_id' => 'nullable'
+            'name' => 'required|string',
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
+            'password' => 'nullable|string|min:6',
+            'role' => 'required|string',
+            'ngo_id' => 'nullable|exists:ngos,id',
         ]);
+
+        if ($cleanData['role'] === 'admin') {
+            $cleanData['ngo_id'] = null;
+        }
+
+        if (!empty($cleanData['password'])) {
+            $cleanData['password'] = Hash::make($cleanData['password']);
+        } else {
+            unset($cleanData['password']);
+        }
 
         $user->update($cleanData);
         return response()->json([
@@ -84,7 +95,7 @@ class UserController extends Controller
     public function destroy(string $id)
     {
         $user = User::find($id);
-        if(!$user){
+        if (!$user) {
             return response()->json([
                 "message" => "User not found"
             ], 404);

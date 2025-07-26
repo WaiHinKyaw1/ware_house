@@ -10,7 +10,6 @@ class Item extends Model
         "name",
         "description",
         "unit",
-        "stock_quantity"
     ];
     public function supplyRequestItems(){
         return $this->hasMany(SupplyRequestItem::class);

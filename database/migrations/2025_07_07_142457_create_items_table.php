@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('unit')->default('kg');
-            $table->integer('stock_quantity')->default(0);
             $table->timestamps();
         });
     }
