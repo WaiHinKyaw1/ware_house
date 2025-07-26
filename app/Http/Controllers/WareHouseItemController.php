@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Item;
+use App\Models\WareHouse;
 use App\Models\WareHouseItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class WareHouseItemController extends Controller
@@ -30,6 +33,18 @@ class WareHouseItemController extends Controller
             'item_id' => ['required', Rule::exists('items', 'id')],
             'quantity' => ['required', 'numeric'],
         ]);
+        $warehouse = WareHouse::findOrFail($cleanData['ware_house_id']);
+        $item = Item::findOrFail($cleanData['item_id']);
+
+        $kgPerUnit = $item->kg_per_unit;
+        $totalKgToAdd = $cleanData['quantity'] * $kgPerUnit;
+
+
+        if ($warehouse->capacity < $totalKgToAdd) {
+            return response()->json([
+                'message' => 'Not enough capacity in warehouse.'
+            ], 400);
+        }
 
         $existing = WarehouseItem::where('ware_house_id', $cleanData['ware_house_id'])
             ->where('item_id', $cleanData['item_id'])
@@ -41,7 +56,8 @@ class WareHouseItemController extends Controller
         } else {
             WarehouseItem::create($cleanData);
         }
-
+        $warehouse->capacity -= $totalKgToAdd;
+        $warehouse->save();
 
         return response()->json([
             "message" => "Warehouse items created successfully."
@@ -61,6 +77,28 @@ class WareHouseItemController extends Controller
             ->get();
         return response()->json($ware_house_items);
     }
+    public function alerts()
+    {
+        $lowStockItems = WarehouseItem::with(['item', 'wareHouse'])
+            ->where('quantity', '<', 10)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'item_name' => $item->item->name,
+                    'warehouse_name' => $item->wareHouse->name,
+                    'quantity' => $item->quantity,
+                ];
+            });
+
+        $systemStatus = [
+            'database' => DB::connection()->getPdo() ? 'ok' : 'down',
+        ];
+
+        return response()->json([
+            'low_stock_items' => $lowStockItems,
+            'system_status' => $systemStatus,
+        ]);
+    }
 
     /**
      * Update the specified resource in storage.
@@ -79,6 +117,24 @@ class WareHouseItemController extends Controller
             'item_id'        => ['required', Rule::exists('items', 'id')],
             'quantity'       => ['required', 'numeric'],
         ]);
+        $warehouse = WareHouse::findOrFail($cleanData['ware_house_id']);
+        $item = Item::findOrFail($cleanData['item_id']);
+
+
+        $oldQuantity = $ware_house_item->quantity;
+        $oldKg = $oldQuantity * $item->kg_per_unit;
+        $newKg = $cleanData['quantity'] * $item->kg_per_unit;
+        $differenceKg = $newKg - $oldKg;
+
+        if ($differenceKg > 0 && $warehouse->capacity < $differenceKg) {
+            return response()->json([
+                'message' => 'Not enough capacity in warehouse to update quantity.'
+            ], 400);
+        }
+
+
+        $warehouse->capacity -= $differenceKg; // if diff < 0 it will increase
+        $warehouse->save();
 
         $ware_house_item->update($cleanData);
 
@@ -98,6 +154,12 @@ class WareHouseItemController extends Controller
                 "message" => "WareHouseItem id not Found",
             ]);
         }
+        $warehouse = $ware_house_item->wareHouse;
+        $item = $ware_house_item->item;
+        $totalKg = $ware_house_item->quantity * $item->kg_per_unit;
+        $warehouse->capacity += $totalKg;
+        $warehouse->save();
+
         $ware_house_item->delete();
         return response()->json([
             "message" => "WareHouseItem successfully deleted"

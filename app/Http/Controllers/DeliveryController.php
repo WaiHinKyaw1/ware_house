@@ -17,7 +17,7 @@ class DeliveryController extends Controller
      */
     public function index()
     {
-        $deliveries = Delivery::with('supplyRequest.ngo', 'truck.driver', 'wareHouse')->get();
+        $deliveries = Delivery::with('supplyRequest.ngo', 'truck.driver')->get();
         return response()->json($deliveries);
     }
 
@@ -36,7 +36,6 @@ class DeliveryController extends Controller
         $supply_request = SupplyRequest::with(['supplyRequestItems'])->find($cleanData['supply_request_id']);
         $delivery = Delivery::create([
             'supply_request_id' => $supply_request->id,
-            'ware_house_id' => $supply_request->supply_request_items->ware_house_id,
             'delivery_date' => $cleanData['delivery_date'],
             'delivery_cost' => $cleanData['delivery_cost'],
             'truck_id' => $cleanData['truck_id'],
@@ -47,7 +46,7 @@ class DeliveryController extends Controller
             $itemId = $requestItem->item_id;
             $quantity = $requestItem->quantity;
 
-            $stock = WareHouseItem::where('ware_house_id', $supply_request->ware_house_id)
+            $stock = WareHouseItem::where('ware_house_id', $requestItem->ware_house_id)
                 ->where('item_id', $itemId)
                 ->first();
 

@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('deliveries', function (Blueprint $table) {
             $table->id();
             $table->foreignId('supply_request_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->foreignId('ware_house_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->date('delivery_date');
             $table->string('status');
             $table->decimal('delivery_cost');

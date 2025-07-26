@@ -25,7 +25,8 @@ class ItemController extends Controller
         $cleanData = $request->validate([
             'name' => ['required','string',Rule::unique('items','name')],
             'unit' => 'required|string|max:255',
-            'description' => 'required|string|max:255',
+            'kg_per_unit' => 'required',
+            'description' => 'nullable|string|max:255',
         ]);
 
         $item = Item::create($cleanData);
@@ -62,9 +63,10 @@ class ItemController extends Controller
             ], 404);
         }
         $cleanData = $request->validate([
-            'name' => ['required','string',Rule::unique('items','name')],
+            'name' => ['required','string',Rule::unique('items','name')->ignore($id)],
             'unit' => 'required|string|max:255',
-            'description' => 'required|string|max:255',
+            'kg_per_unit' => 'required',
+            'description' => 'nullable|string|max:255',
         ]);
         $item->update($cleanData);
 

@@ -12,6 +12,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\WareHouseController;
 use App\Http\Controllers\WareHouseItemController;
 use App\Models\SupplyRequest;
+use App\Models\WareHouseItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +26,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('change-passwords', [AuthController::class, 'changePassword']);
     Route::PUT('update_profile', [AuthController::class, 'update_profile']);
 });
+Route::get('/dashboard/alerts', [WareHouseItemController::class, 'alerts']);
 Route::get('/warehouses/{id}/capacity', [WareHouseController::class, 'capacityStatus']);
 Route::apiResource('users', UserController::class);
 Route::apiResource('items', ItemController::class);

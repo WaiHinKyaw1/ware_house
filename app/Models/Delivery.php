@@ -8,7 +8,6 @@ class Delivery extends Model
 {
     protected $fillable = [
         'supply_request_id',
-        'ware_house_id',
         'delivery_date',
         'status',
         'delivery_cost',
