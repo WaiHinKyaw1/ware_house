@@ -25,6 +25,6 @@ class SupplyRequest extends Model
     }
     public function supplyRequestItems()
     {
-        return $this->hasMany(SupplyRequestItem::class);
+        return $this->hasMany(SupplyRequestItem::class)->with('item');
     }
 }

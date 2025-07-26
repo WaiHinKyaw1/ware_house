@@ -14,7 +14,7 @@ class SupplyRequestController extends Controller
      */
     public function index()
     {
-        $supply_requests = SupplyRequest::with('ngo','supplyRequestItems','routeInfos','warehouse')->get();
+        $supply_requests = SupplyRequest::with('ngo', 'supplyRequestItems.wareHouse', 'routeInfos')->get();
         return response()->json($supply_requests);
     }
 
@@ -24,11 +24,11 @@ class SupplyRequestController extends Controller
     public function store(Request $request)
     {
         $cleanData = $request->validate([
-            'ngo_id' => ['required',Rule::exists('ngos','id')],
-            
+            'ngo_id' => ['required', Rule::exists('ngos', 'id')],
+
             'items' => 'required|array|min:1',
-            'items.*.ware_house_id' => ['required', Rule::exists('ware_houses','id')],
-            'items.*.item_id' => ['required', Rule::exists('items', 'id')],
+            'items.*.ware_house_id' => ['required', Rule::exists('ware_houses', 'id')],
+            'items.*.item_id' => ['required', Rule::exists('items', column: 'id')],
             'items.*.quantity' => 'required|integer|min:1',
 
             'start' => 'required|string',
@@ -38,29 +38,31 @@ class SupplyRequestController extends Controller
             'duration_minutes' => 'required|integer',
             'charge' => 'required|numeric',
         ]);
-        $cleanData['request_date'] =date('Y-m-d');
+        $cleanData['request_date'] = date('Y-m-d');
         $supply_request = SupplyRequest::create([
             'ngo_id' => $cleanData['ngo_id'],
             'request_date' => $cleanData['request_date'],
             'status' => 'pending',
         ]);
-        foreach($cleanData['items'] as $item){
+        foreach ($cleanData['items'] as $item) {
             $supply_request->supplyRequestItems()->create([
                 'ware_house_id' => $item['ware_house_id'],
                 'item_id' => $item['item_id'],
                 'quantity' => $item['quantity'],
             ]);
         }
-            RouteInfo::create([
+        $minutes = $cleanData['duration_minutes'];
+        $formattedTime = gmdate('H:i:s', $minutes * 60);
+        RouteInfo::create([
             'start' => $cleanData['start'],
             'end' => $cleanData['end'],
             'distance_km' => $cleanData['distance_km'],
             'distance_miles' => $cleanData['distance_miles'],
-            'duration_minutes' => $cleanData['duration_minutes'],
+            'duration_minutes' => $formattedTime,
             'charge' => $cleanData['charge'],
             'supply_request_id' => $supply_request->id,
         ]);
-        return response()->json([   
+        return response()->json([
             'message' => "Supply Request created successfully",
             'id' => $supply_request->id
         ]);
@@ -72,7 +74,7 @@ class SupplyRequestController extends Controller
     public function show(string $id)
     {
         $supply_request = SupplyRequest::find($id);
-        if(!$supply_request){
+        if (!$supply_request) {
             return response()->json([
                 "message" => " Supply Request id not Found"
             ]);
@@ -94,7 +96,7 @@ class SupplyRequestController extends Controller
     public function destroy(string $id)
     {
         $supply_request = SupplyRequest::find($id);
-        if(!$supply_request){
+        if (!$supply_request) {
             return response()->json([
                 "message" => "SupplyRequest id not found"
             ]);

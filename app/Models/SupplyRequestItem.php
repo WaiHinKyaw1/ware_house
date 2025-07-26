@@ -6,19 +6,22 @@ use Illuminate\Database\Eloquent\Model;
 
 class SupplyRequestItem extends Model
 {
-    protected $fillable =[
+    protected $fillable = [
         "supply_request_id",
         "ware_house_id",
         "item_id",
         "quantity"
     ];
-    public function item(){
+    public function item()
+    {
         return $this->belongsTo(Item::class);
     }
-    public function wareHouse(){
+    public function wareHouse()
+    {
         return $this->belongsTo(WareHouse::class);
     }
-    public function supplyRequest(){
-        return $this->belongsTo(SupplyRequest::class);
+    public function supplyRequest()
+    {
+        return $this->belongsTo(SupplyRequest::class)->with('item');
     }
 }

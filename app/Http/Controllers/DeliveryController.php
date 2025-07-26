@@ -28,15 +28,15 @@ class DeliveryController extends Controller
     {
         $cleanData = $request->validate([
             'supply_request_id' => 'required|exists:supply_requests,id',
-            'delivery_date' => 'required|date',
             'delivery_cost' => 'required|numeric',
             'truck_id' => 'required|exists:trucks,id',
         ]);
 
+        $cleanData['delivery_date'] = date('Y-m-d');
         $supply_request = SupplyRequest::with(['supplyRequestItems'])->find($cleanData['supply_request_id']);
         $delivery = Delivery::create([
             'supply_request_id' => $supply_request->id,
-            'ware_house_id' => $supply_request->ware_house_id,
+            'ware_house_id' => $supply_request->supply_request_items->ware_house_id,
             'delivery_date' => $cleanData['delivery_date'],
             'delivery_cost' => $cleanData['delivery_cost'],
             'truck_id' => $cleanData['truck_id'],
@@ -98,24 +98,25 @@ class DeliveryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id) {
+    public function update(Request $request, string $id)
+    {
         $delivery = Delivery::find($id);
-        if(!$delivery){
-             return response()->json([
+        if (!$delivery) {
+            return response()->json([
                 "message" => "Delivery id not found"
             ]);
         }
-      $cleanData= $request->validate([
-        'status' => "required"
-      ]);
+        $cleanData = $request->validate([
+            'status' => "required"
+        ]);
 
-    $delivery->update($cleanData);
-    return response()->json([
-        "message" => "Delivery updated successfully"
-    ]);
+        $delivery->update($cleanData);
+        return response()->json([
+            "message" => "Delivery updated successfully"
+        ]);
     }
 
-    
+
     public function destroy(string $id)
     {
         $delivery = Delivery::find($id);

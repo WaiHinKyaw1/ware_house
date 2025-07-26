@@ -23,6 +23,7 @@ Route::post('login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('change-passwords', [AuthController::class, 'changePassword']);
+    Route::PUT('update_profile', [AuthController::class, 'update_profile']);
 });
 Route::get('/warehouses/{id}/capacity', [WareHouseController::class, 'capacityStatus']);
 Route::apiResource('users', UserController::class);
@@ -33,4 +34,4 @@ Route::apiResource('warehouses', WareHouseController::class);
 Route::apiResource('trucks', TruckController::class);
 Route::apiResource('deliveries', DeliveryController::class);
 Route::apiResource('supply-requests', SupplyRequestController::class);
-Route::apiResource('drivers',DriverController::class);
+Route::apiResource('drivers', DriverController::class);

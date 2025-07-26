@@ -51,6 +51,21 @@ class AuthController extends Controller
 
         return response()->json(['id' => $user->id, 'message' => 'Password successfully updated.']);
     }
+    public function update_profile(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['message' => 'User id is not found'], 404);
+        }
+        $cleanData = $request->validate([
+            'name' => 'required',
+            'email' => 'required|email'
+        ]);
+        $user->update($cleanData);
+
+        return response()->json(['id' => $user->id, 'message' => 'Password successfully updated.']);
+    }
+
 
     public function logout(Request $request)
     {
