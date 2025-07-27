@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('supply_request_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('supply_request_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->foreignId('ware_house_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->foreignId('item_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('ware_house_id')->constrained()->restrictOnDelete()->cascadeOnUpdate();
+            $table->foreignId('item_id')->constrained()->restrictOnDelete()->cascadeOnUpdate();
             $table->integer('quantity');
             $table->timestamps();
         });

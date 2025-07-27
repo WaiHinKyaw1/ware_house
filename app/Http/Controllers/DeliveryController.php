@@ -9,6 +9,7 @@ use App\Models\SupplyRequest;
 use App\Models\Truck;
 use App\Models\WareHouseItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DeliveryController extends Controller
 {
@@ -32,52 +33,90 @@ class DeliveryController extends Controller
             'truck_id' => 'required|exists:trucks,id',
         ]);
 
-        $cleanData['delivery_date'] = date('Y-m-d');
-        $supply_request = SupplyRequest::with(['supplyRequestItems'])->find($cleanData['supply_request_id']);
-        $delivery = Delivery::create([
-            'supply_request_id' => $supply_request->id,
-            'delivery_date' => $cleanData['delivery_date'],
-            'delivery_cost' => $cleanData['delivery_cost'],
-            'truck_id' => $cleanData['truck_id'],
-            'status' => 'in Transit',
-        ]);
-        // (2) Reduce stock from warehouse_items
-        foreach ($supply_request->supplyRequestItems as $requestItem) {
-            $itemId = $requestItem->item_id;
-            $quantity = $requestItem->quantity;
+        DB::beginTransaction();
+        try {
+            $cleanData['delivery_date'] = date('Y-m-d');
 
-            $stock = WareHouseItem::where('ware_house_id', $requestItem->ware_house_id)
-                ->where('item_id', $itemId)
-                ->first();
+            // Load supply request with related items and their weights
+            $supply_request = SupplyRequest::with(['supplyRequestItems.item'])->find($cleanData['supply_request_id']);
 
-            if (!$stock || $stock->quantity < $quantity) {
-                throw new \Exception("Not enough stock for item ID {$itemId}");
+            // Calculate total weight
+            $totalWeight = 0;
+            foreach ($supply_request->supplyRequestItems as $requestItem) {
+                $totalWeight += $requestItem->quantity * $requestItem->item->kg_per_unit;
             }
 
-            $stock->decrement('quantity', $quantity);
-            DeliveryItem::create([
-                'delivery_id' => $delivery->id,
-                'item_id' => $itemId,
-                'quantity' => $quantity,
-            ]);
-        }
+            // Check truck capacity before creating delivery
+            $truck = Truck::findOrFail($cleanData['truck_id']);
+            if ($totalWeight > $truck->capacity) {
+                return response()->json([
+                    'message' => "Truck overload: max capacity is {$truck->capacity}kg, trying to load {$totalWeight}kg",
+                ], 422);
+            }
 
-        Truck::where('id', $cleanData['truck_id'])->update([
-            'status' => 'inUse',
-        ]);
-
-        // Driver status ကို update လုပ်မယ် (truck table ထဲက driver_id ကိုသုံးမယ်)
-        $truck = Truck::find($cleanData['truck_id']);
-        if ($truck && $truck->driver_id) {
-            Driver::where('id', $truck->driver_id)->update([
-                'status' => 'onLeave',
+            // Create the delivery record
+            $delivery = Delivery::create([
+                'supply_request_id' => $supply_request->id,
+                'delivery_date' => $cleanData['delivery_date'],
+                'delivery_cost' => $cleanData['delivery_cost'],
+                'truck_id' => $cleanData['truck_id'],
+                'status' => 'in Transit',
             ]);
+
+            // Process each supply request item
+            foreach ($supply_request->supplyRequestItems as $requestItem) {
+                $itemId = $requestItem->item_id;
+                $quantity = $requestItem->quantity;
+
+                $stock = WareHouseItem::where('ware_house_id', $requestItem->ware_house_id)
+                    ->where('item_id', $itemId)
+                    ->first();
+
+                if (!$stock || $stock->quantity < $quantity) {
+                    throw new \Exception("Not enough stock for item ID {$itemId}");
+                }
+
+                // Deduct stock
+                $stock->decrement('quantity', $quantity);
+
+                // Increase warehouse available capacity (free space)
+                $item = $requestItem->item;
+                $warehouse = $requestItem->wareHouse;
+                $totalKg = $quantity * $item->kg_per_unit;
+                $warehouse->capacity += $totalKg;
+                $warehouse->save();
+
+                // Create delivery item
+                DeliveryItem::create([
+                    'delivery_id' => $delivery->id,
+                    'item_id' => $itemId,
+                    'quantity' => $quantity,
+                ]);
+            }
+
+            // Update truck status
+            $truck->update(['status' => 'inUse']);
+
+            // Update driver status if exists
+            if ($truck->driver_id) {
+                Driver::where('id', $truck->driver_id)->update([
+                    'status' => 'onLeave',
+                ]);
+            }
+
+            // Mark supply request as approved
+            $supply_request->update(['status' => 'approved']);
+
+            DB::commit();
+            return response()->json([
+                'message' => "Delivery created successfully",
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => "Delivery failed: " . $e->getMessage(),
+            ], 500);
         }
-        // (4) Mark request as approved
-        $supply_request->update(['status' => 'approved']);
-        return response()->json([
-            'message' => "Delivery created successfully",
-        ]);
     }
 
     /**

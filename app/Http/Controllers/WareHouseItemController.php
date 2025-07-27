@@ -133,7 +133,7 @@ class WareHouseItemController extends Controller
         }
 
 
-        $warehouse->capacity -= $differenceKg; // if diff < 0 it will increase
+        $warehouse->capacity -= $differenceKg;
         $warehouse->save();
 
         $ware_house_item->update($cleanData);

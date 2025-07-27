@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('supply_requests', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('ngo_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('ngo_id')->constrained()->restrictOnDelete()->cascadeOnUpdate();
             $table->date('request_date');
             $table->string('status');
             $table->timestamps();
