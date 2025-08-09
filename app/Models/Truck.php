@@ -11,7 +11,8 @@ class Truck extends Model
         'model',
         'driver_id',
         'capacity',
-        'status'
+        'status',
+        'ware_house_id'
     ];
 
     public function driver()
@@ -20,5 +21,9 @@ class Truck extends Model
     }
     public function rotueInfos(){
         return $this->hasMany(RouteInfo::class);
+    }
+    public function wareHouse()
+    {
+        return $this->belongsTo(wareHouse::class);
     }
 }

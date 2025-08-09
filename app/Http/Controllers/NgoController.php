@@ -88,6 +88,12 @@ class NgoController extends Controller
                 "message" => "NGO not found"
             ], 404);
         }
+        if ($ngo->wareHouseItems()->exists()) {
+            return response()->json([
+                'message' => 'Cannot Delete: Ngo is in use by  WareHouseItem.',
+                'id' => $ngo->id,
+            ], 422);
+        }
         $ngo->delete();
         return response()->json([
             "message" => "NGO deleted successfully",

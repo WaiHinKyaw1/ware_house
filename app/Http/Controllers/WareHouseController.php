@@ -117,6 +117,12 @@ class WareHouseController extends Controller
                 'message' => "Ware House is not found"
             ]);
         }
+         if ($ware_house->wareHouseItems()->exists()) {
+            return response()->json([
+                'message' => 'Cannot Delete: WareHouse is in use by  WareHouseItem.',
+                'id' => $ware_house->id,
+            ], 422);
+        }
         $ware_house->delete();
         return response()->json([
             'message' => "Ware House deleted successfully"

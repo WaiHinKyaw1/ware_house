@@ -87,6 +87,12 @@ class ItemController extends Controller
                 "message" => "Item not found"
             ], 404);
         }
+        if ($item->wareHouseItems()->exists()) {
+            return response()->json([
+                'message' => 'Cannot Delete: Item is in use by  WareHouseItem.',
+                'id' => $item->id,
+            ], 422);
+        }
         $item->delete();
 
         return response()->json([

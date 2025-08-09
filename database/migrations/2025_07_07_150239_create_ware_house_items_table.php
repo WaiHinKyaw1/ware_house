@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('ware_house_id')->constrained()->restrictOnDelete()->cascadeOnUpdate();
             $table->foreignId('item_id')->constrained()->restrictOnDelete()->cascadeOnUpdate();
             $table->integer('quantity');
-            $table->foreignId('ngo_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('ngo_id')->constrained()->restrictOnDelete()->cascadeOnUpdate();
             $table->timestamps();
         });
     }

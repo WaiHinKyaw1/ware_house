@@ -17,7 +17,8 @@ return new class extends Migration
             $table->string('model');
             $table->integer('capacity');
             $table->string('status');
-            $table->foreignId('driver_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('ware_house_id')->constrained()->restrictOnDelete()->cascadeOnUpdate();
+            $table->foreignId('driver_id')->constrained()->restrictOnDelete()->cascadeOnUpdate();
             $table->timestamps();
         });
     }

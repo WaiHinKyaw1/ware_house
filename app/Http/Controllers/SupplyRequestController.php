@@ -14,8 +14,8 @@ class SupplyRequestController extends Controller
      */
     public function index()
     {
-        $supply_requests = SupplyRequest::with('ngo', 'supplyRequestItems.wareHouse', 'routeInfos')->get();
-        return response()->json($supply_requests);
+        $supply_requests = SupplyRequest::with('ngo', 'supplyRequestItems.wareHouse', 'routeInfos','deliveries')->get();
+        return response()->json($supply_requests);  
     }
 
     /**

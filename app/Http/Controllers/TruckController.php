@@ -8,12 +8,10 @@ use Illuminate\Validation\Rule;
 
 class TruckController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    
     public function index()
     {
-        $trucks = Truck::with('driver')->get();
+        $trucks = Truck::with('driver','wareHouse')->get();
         return response()->json($trucks);
     }
 
@@ -28,6 +26,7 @@ class TruckController extends Controller
             "capacity" => ['required', 'integer'],
             "status" => ['required', 'string'],
             "driver_id" => ['required', Rule::exists('drivers', 'id')],
+            "ware_house_id" => ['required', Rule::exists('ware_houses','id')]
         ]);
         $truck = Truck::create($cleanData);
         return response()->json([
@@ -67,6 +66,7 @@ class TruckController extends Controller
             "capacity" => ['required', 'integer'],
             "status" => ['required', 'string'],
             "driver_id" => ['required', Rule::exists('drivers', 'id')],
+            "ware_house_id" => ['required', Rule::exists('ware_houses','id')]
         ]);
         $truck->update($cleanData);
         return response()->json([
