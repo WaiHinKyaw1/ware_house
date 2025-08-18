@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Driver;
 use App\Models\Truck;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -29,6 +30,8 @@ class TruckController extends Controller
             "ware_house_id" => ['required', Rule::exists('ware_houses','id')]
         ]);
         $truck = Truck::create($cleanData);
+        $driver = Driver::find($cleanData['driver_id']);
+        $driver->update(['status' => 'inactive']);
         return response()->json([
             "message" => "Truck created successfully",
             "id" => $truck->id
